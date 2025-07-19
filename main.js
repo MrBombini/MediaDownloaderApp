@@ -1,14 +1,22 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const isDev = require('electron-is-dev');
-const { descargarVideo } = require('./backend/downloader');
+const { descargarVideo, obtenerInfoVideo } = require('./backend/downloader');
+ipcMain.handle('obtener-info-video', async (event, url) => {
+  try {
+    const info = await obtenerInfoVideo(url);
+    return info;
+  } catch (err) {
+    return null;
+  }
+});
 
 let mainWindow;
 
 function createWindow() {
     mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: 1200,
+        height: 800,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,
@@ -39,11 +47,31 @@ app.on('activate', () => {
     }
 });
 
-ipcMain.handle('descargar-video', async (event, { url, formato }) => {
+ipcMain.handle('elegir-carpeta', async () => {
+  const result = await dialog.showOpenDialog({
+    properties: ['openDirectory'],
+  });
+  return result.canceled ? null : result.filePaths[0];
+});
+
+ipcMain.handle('descargar-video', async (event, { url, formato, ruta }) => {
   try {
-    const resultado = await descargarVideo(url, formato);
-    return { ok: true, path: resultado };
-  } catch (error) {
-    return { ok: false, error: error.message };
+    const resultPath = await descargarVideo(url, formato, ruta);
+    return { ok: true, path: resultPath };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
+});
+
+ipcMain.handle('bloquear-ventana', async (event, bloquear) => {
+  if (mainWindow) {
+    mainWindow.setEnabled(!bloquear);
+    if (!bloquear) {
+      setTimeout(() => {
+        if (!mainWindow.isFocused()) {
+          mainWindow.focus();
+        }
+      }, 100);
+    }
   }
 });
