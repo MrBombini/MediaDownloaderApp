@@ -1,0 +1,21 @@
+{
+  "name": "appdescargarvideos",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "keywords": [],
+  "author": "Rodrigo Sergio",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "electron": "^37.2.3",
+    "electron-builder": "^26.0.12",
+    "electron-is-dev": "^3.0.1"
+  },
+  "dependencies": {
+    "yt-dlp-wrap": "^2.3.12"
+  }
+}
